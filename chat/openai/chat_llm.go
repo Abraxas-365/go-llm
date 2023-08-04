@@ -106,7 +106,7 @@ func (c *ChatOpenAI) Generate(messages [][]chat.BaseMessage) (*chat.AIMessage, e
 
 	aiMessage := chat.NewAIMessage(responseMessage.Message.Content)
 
-	return aiMessage, nil
+	return aiMessage.(*chat.AIMessage), nil
 }
 
 func (c *ChatOpenAI) Call(query string) (string, error) {
