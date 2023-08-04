@@ -13,7 +13,7 @@ type HumanMessage struct {
 	content string
 }
 
-func NewHumanMessage(content string) *HumanMessage {
+func NewHumanMessage(content string) BaseMessage {
 	return &HumanMessage{content: content}
 }
 
@@ -29,7 +29,7 @@ type SystemMessage struct {
 	content string
 }
 
-func NewSystemMessage(content string) *SystemMessage {
+func NewSystemMessage(content string) BaseMessage {
 	return &SystemMessage{content: content}
 }
 
@@ -45,7 +45,7 @@ type AIMessage struct {
 	content string
 }
 
-func NewAIMessage(content string) *AIMessage {
+func NewAIMessage(content string) BaseMessage {
 	return &AIMessage{content: content}
 }
 
