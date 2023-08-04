@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/Abraxas-365/go-llm/embedding"
 )
 
 type OpenAiEmbedder struct {
@@ -31,7 +33,7 @@ type EmbeddingsResponse struct {
 	} `json:"usage"`
 }
 
-func NewOpenAiEmbedder(options ...func(*OpenAiEmbedder)) *OpenAiEmbedder {
+func NewOpenAiEmbedder(options ...func(*OpenAiEmbedder)) embedding.BaseEmbedder {
 	openaiKey, exists := os.LookupEnv("OPENAI_API_KEY")
 	if !exists {
 		openaiKey = ""
