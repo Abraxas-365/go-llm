@@ -18,7 +18,7 @@ type ChatOpenAI struct {
 	OpenAIKey   string
 }
 
-func NewChatOpenAI(options ...func(*ChatOpenAI)) *ChatOpenAI {
+func NewChatOpenAI(options ...func(*ChatOpenAI)) chat.BaseChat {
 	openaiKey, exists := os.LookupEnv("OPENAI_API_KEY")
 	if !exists {
 		openaiKey = ""
@@ -107,4 +107,51 @@ func (c *ChatOpenAI) Generate(messages [][]chat.BaseMessage) (*chat.AIMessage, e
 	aiMessage := chat.NewAIMessage(responseMessage.Message.Content)
 
 	return aiMessage, nil
+}
+
+func (c *ChatOpenAI) Call(query string) (string, error) {
+
+	apiRequest := &Request{
+		Model:    string(c.Model),
+		Messages: []Message{{Role: "user", Content: query}},
+	}
+
+	requestBody, err := json.Marshal(apiRequest)
+	if err != nil {
+		return "", err
+	}
+
+	req, err := http.NewRequest("POST", "https://api.openai.com/v1/chat/completions", bytes.NewBuffer(requestBody))
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.OpenAIKey))
+
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		bodyBytes, _ := ioutil.ReadAll(resp.Body)
+		bodyString := string(bodyBytes)
+		return "", NewOpenaiError(resp.StatusCode, bodyString)
+	}
+
+	var apiResponse Response
+	err = json.NewDecoder(resp.Body).Decode(&apiResponse)
+	if err != nil {
+		return "", err
+	}
+
+	responseMessage := apiResponse.Choices[0]
+	return responseMessage.Message.Content, nil
 }
